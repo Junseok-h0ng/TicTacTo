@@ -1,6 +1,7 @@
 var td = document.getElementsByTagName('td');
 var tr = document.getElementsByTagName('tr');
-
+var divResult = document.getElementById('result');
+var reset = document.getElementById('reset');
 var game = { 'lines': [], 'blanks': [], 'currentTurn': 'X' };
 
 //현재 누른 칸의 위치 찾기
@@ -25,17 +26,18 @@ game.checkBlank = function (wLine, wBlank) {
 
 //3줄의 칸이 같은지 찾기
 game.checkLine = function (wLine, wBlank) {
+    var result = false;
     //가로줄 체크
     if (this.blanks[wLine][0].textContent === this.currentTurn &&
         this.blanks[wLine][1].textContent === this.currentTurn &&
         this.blanks[wLine][2].textContent === this.currentTurn) {
-        console.log("dd");
+        result = true;
     }
     //세로줄 체크
     if (this.blanks[0][wBlank].textContent === this.currentTurn &&
         this.blanks[1][wBlank].textContent === this.currentTurn &&
         this.blanks[2][wBlank].textContent === this.currentTurn) {
-        console.log('rr');
+        result = true;
     }
     //대각선 체크
     if ((wLine - wBlank === 0) || (Math.abs(wLine + wBlank === 2))) {
@@ -45,20 +47,26 @@ game.checkLine = function (wLine, wBlank) {
             || this.blanks[0][2].textContent === this.currentTurn &&
             this.blanks[1][1].textContent === this.currentTurn &&
             this.blanks[2][0].textContent === this.currentTurn) {
-            console.log('aa');
+            result = true;
         }
     }
 
-    this.changeTurn(wLine, wBlank);
+    this.changeTurn(wLine, wBlank, result);
 }
 
-game.changeTurn = function (wLine, wBlank) {
-    if (this.currentTurn === 'X') {
-        this.blanks[wLine][wBlank].textContent = this.currentTurn;
-        this.currentTurn = 'O';
+//칸이 다찼으면 종료 안찼으면 턴 바꾸기
+game.changeTurn = function (wLine, wBlank, result) {
+    if (result) {
+        divResult.innerText = (this.currentTurn + '님이 승리했습니다.');
+        reset.style.display = "block";
     } else {
-        this.blanks[wLine][wBlank].textContent = this.currentTurn;
-        this.currentTurn = 'X';
+        if (this.currentTurn === 'X') {
+            this.blanks[wLine][wBlank].textContent = this.currentTurn;
+            this.currentTurn = 'O';
+        } else {
+            this.blanks[wLine][wBlank].textContent = this.currentTurn;
+            this.currentTurn = 'X';
+        }
     }
 }
 //칸을 클릭
@@ -81,3 +89,16 @@ var init = function () {
 }
 
 init();
+
+//리셋
+reset.addEventListener('click', function () {
+    game.blanks.forEach(function (line) {
+        line.forEach(function (blank) {
+            blank.textContent = "";
+        })
+    })
+
+    result.innerText = '';
+    reset.style.display = 'none';
+
+});
